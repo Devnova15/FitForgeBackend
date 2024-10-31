@@ -59,6 +59,37 @@ exports.updatePost = (req, res, next) => {
     );
 };
 
+exports.updatePostLikes = (req, res, next) => {
+  Post.findOne({ _id: req.params.id })
+    .then((post) => {
+      if (!post) {
+        return res.status(404).json({
+          message: `Post with id "${req.params.id}" is not found.`,
+        });
+      }
+
+      const updatedPost = queryCreator({ likes: req.body.likes });
+
+      Post.findOneAndUpdate(
+        { _id: req.params.id },
+        { $set: updatedPost },
+        { new: true },
+      )
+        .populate("user", "firstName lastName email avatarUrl")
+        .then((post) => res.json(post))
+        .catch((err) =>
+          res.status(400).json({
+            message: `Error happened on server: "${err}" `,
+          }),
+        );
+    })
+    .catch((err) =>
+      res.status(400).json({
+        message: `Error happened on server: "${err}" `,
+      }),
+    );
+};
+
 exports.deletePost = (req, res, next) => {
   Post.findOne({ _id: req.params.id }).then((post) => {
     if (!post) {
@@ -110,7 +141,7 @@ exports.getPostsFilterParams = async (req, res, next) => {
   const mongooseQuery = filterParser(req.query);
   const perPage = Number(req.query.perPage) || 10;
   const startPage = Number(req.query.startPage) || 1;
-  const sort = req.query.sort || 'date';
+  const sort = req.query.sort || "date";
 
   try {
     const posts = await Post.find(mongooseQuery)

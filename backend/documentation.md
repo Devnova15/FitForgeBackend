@@ -296,6 +296,32 @@ response example
     "date": "2024-07-24T13:51:09.919Z",
 }
 
+## PATCH api/posts/:id (Public) - Update post likes
+body properties
+{
+    likes: Number (required)
+}
+
+response example
+{
+    "imageUrls": [
+        "img/test/001.png"
+    ],
+    "enabled": true,
+    "_id": "66a106cd13638154607891fb",
+    "content": "test content",
+    "user": {
+        "_id": "66904bae6f02332558695ccc",
+        "firstName": "Noadmin",
+        "lastName": "Newone",
+        "email": "user@gmail.com",
+        "avatarUrl": "img/user/023648.png"
+    },
+    "date": "2024-07-24T13:51:09.919Z",
+}
+
+
+
 ## DELETE api/posts/:id (Private) - Delete existing post
 response example
 {

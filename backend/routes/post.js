@@ -6,6 +6,7 @@ const passport = require("passport");
 const {
   createPost,
   updatePost,
+  updatePostLikes,
   deletePost,
   getPostById,
   getPostsFilterParams,
@@ -23,6 +24,13 @@ router.put(
   "/:id",
   passport.authenticate("jwt", { session: false }),
   updatePost,
+);
+
+// @route   PATCH api/posts/:id
+// @desc    Update post likes
+router.patch(
+    "/:id",
+    updatePostLikes,
 );
 
 // @route   DELETE api/posts/:id

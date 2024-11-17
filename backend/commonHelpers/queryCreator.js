@@ -8,7 +8,7 @@ module.exports = function queryCreator(data) {
     if (isJSON(data[param])) {
       queryObject[param] = JSON.parse(data[param]);
     } else if (
-      !FormValidator.isEmpty(data[param]) &&
+      (!FormValidator.isEmpty(data[param]) || Array.isArray(data[param])) &&
       !excludedParams.includes(param)
     ) {
       queryObject[param] = data[param];

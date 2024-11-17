@@ -123,6 +123,64 @@ response example
     "date": "2024-07-21T17:23:43.027Z",
 }
 
+## GET /api/users (Public) - GET appropriate filtered users
+response example
+{
+    "users": [
+        {
+            "enabled": true,
+            "awards": [],
+            "_id": "66904bae6f02332558695ccc",
+            "firstName": "Noadmin",
+            "lastName": "Newone",
+            "email": "user@gmail.com",
+            "gender": "male",
+            "avatarUrl": "img/user/023648.png",
+            "date": "2024-07-11T21:16:30.621Z",
+            "__v": 0
+        },
+        {
+            "enabled": true,
+            "awards": [
+                "669d410380ffef5b48a19cb2",
+                "669d411480ffef5b48a19cb5"
+            ],
+            "_id": "669d441f56e97129645fb0ac",
+            "firstName": "Admin",
+            "lastName": "Newone",
+            "email": "user2@gmail.com",
+            "gender": "male",
+            "avatarUrl": "img/user/023648.png",
+            "date": "2024-07-21T17:23:43.027Z",
+            "__v": 0
+        },
+    ],
+    "usersQuantity": 2
+}
+
+
+## GET /api/users/:id (Public) - Get existing user with awards
+response example
+{
+    "isAdmin": false,
+    "enabled": true,
+    "awards": [
+        {
+            "_id": "669d410380ffef5b48a19cb2",
+            "content": "super award 1",
+            "imageUrls": "img/test/001.png",
+            "date": "2024-07-21T17:10:27.924Z",
+        }
+    ],
+    "_id": "669d441f56e97129645fb0ac",
+    "firstName": "Admin",
+    "lastName": "Newone",
+    "email": "user2@gmail.com",
+    "gender": "male",
+    "avatarUrl": "img/user/023648.png",
+    "date": "2024-07-21T17:23:43.027Z",
+}
+
 ## PUT /api/users/awards/:awardId (Private) - Add award to user
 response example
 {

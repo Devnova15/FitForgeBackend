@@ -60,6 +60,7 @@ exports.updatePost = (req, res, next) => {
 };
 
 exports.updatePostLikes = (req, res, next) => {
+  req.user.id;
   Post.findOne({ _id: req.params.id })
     .then((post) => {
       if (!post) {
@@ -68,7 +69,14 @@ exports.updatePostLikes = (req, res, next) => {
         });
       }
 
-      const updatedPost = queryCreator({ likes: req.body.likes });
+      const likes = post.likes || [];
+      const likeIndex = likes.indexOf(req.user.id);
+      if (likeIndex > -1) {
+        likes.splice(likeIndex, 1);
+      } else {
+        likes.push(req.user.id);
+      }
+      const updatedPost = queryCreator({ likes });
 
       Post.findOneAndUpdate(
         { _id: req.params.id },

@@ -22,9 +22,12 @@ const PostSchema = new Schema(
       required: true,
       default: true,
     },
-    likes: {
-      type: Number,
-    },
+    likes: [
+      {
+        type: String,
+        default: [],
+      },
+    ],
     date: {
       type: Date,
       default: Date.now,

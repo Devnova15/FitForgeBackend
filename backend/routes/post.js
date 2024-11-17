@@ -28,8 +28,10 @@ router.put(
 
 // @route   PATCH api/posts/:id
 // @desc    Update post likes
+// @access  Private
 router.patch(
     "/:id",
+    passport.authenticate("jwt", { session: false }),
     updatePostLikes,
 );
 

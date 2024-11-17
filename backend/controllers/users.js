@@ -16,6 +16,8 @@ const validateRegistrationForm = require("../validation/validationHelper");
 
 // Load helper for creating correct query to save user to DB
 const queryCreator = require("../commonHelpers/queryCreator");
+const filterParser = require("../commonHelpers/filterParser");
+const Post = require("../models/Post");
 
 // Controller for creating user and saving to DB
 exports.createUser = (req, res, next) => {
@@ -373,4 +375,26 @@ exports.deleteAwardFromUser = async (req, res, next) => {
         message: `Error happened on server: "${err}" `,
       }),
     );
+};
+
+exports.getUsersFilterParams = async (req, res, next) => {
+    const mongooseQuery = filterParser(req.query);
+    const perPage = Number(req.query.perPage) || 10;
+    const startPage = Number(req.query.startPage) || 1;
+    const sort = req.query.sort || "date";
+
+    try {
+        const users = await User.find(mongooseQuery).select("-login -password -isAdmin")
+            .skip(startPage * perPage - perPage)
+            .limit(perPage)
+            .sort(sort);
+
+        const usersQuantity = await User.find(mongooseQuery);
+
+        res.json({ users, usersQuantity: usersQuantity.length });
+    } catch (err) {
+        res.status(400).json({
+            message: `Error happened on server: "${err}" `,
+        });
+    }
 };

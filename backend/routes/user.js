@@ -11,6 +11,7 @@ const {
   updatePassword,
   addAwardToUser,
   deleteAwardFromUser,
+  getUsersFilterParams,
 } = require("../controllers/users");
 
 // @route   POST /api/users
@@ -59,5 +60,10 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   deleteAwardFromUser,
 );
+
+// @route   GET api/users
+// @desc    GET appropriate filtered users
+// @access  Public
+router.get("/", getUsersFilterParams);
 
 module.exports = router;

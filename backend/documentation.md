@@ -235,6 +235,61 @@ response example
     "date": "2024-07-21T17:23:43.027Z",
 }
 
+## PUT /api/users/followers/:userId (Private) - Add user to followers list
+response example
+{
+    "isAdmin": false,
+    "enabled": true,
+    "awards": [ ],
+    "followers": [
+        {
+            "_id": "669d441f56e97129645fb0ac",
+            "firstName": "Admin",
+            "lastName": "Newone",
+            "email": "user2@gmail.com",
+            "avatarUrl": "img/user/023648.png"
+        },
+    ],
+    "followedBy": [ ],
+    "_id": "669d441f56e97129645fb0ac",
+    "firstName": "Admin",
+    "lastName": "Newone",
+    "login": "User2",
+    "email": "user2@gmail.com",
+    "password": "$2a$10$m.CiTfj7.VLOJWKudf86z.OYaCg.P7pS56kUCLBeDNZB2RldlV6iK",
+    "gender": "male",
+    "avatarUrl": "img/user/023648.png",
+    "date": "2024-07-21T17:23:43.027Z",
+}
+
+## DELETE /api/users/followers/:userId (Private) - Delete user from followers list
+response example
+{
+    "isAdmin": false,
+    "enabled": true,
+    "awards": [ ],
+    "followers": [
+        {
+            "_id": "669d441f56e97129645fb0ac",
+            "firstName": "Admin",
+            "lastName": "Newone",
+            "email": "user2@gmail.com",
+            "avatarUrl": "img/user/023648.png"
+        },
+    ],
+    "followedBy": [ ],
+    "_id": "669d441f56e97129645fb0ac",
+    "firstName": "Admin",
+    "lastName": "Newone",
+    "login": "User2",
+    "email": "user2@gmail.com",
+    "password": "$2a$10$m.CiTfj7.VLOJWKudf86z.OYaCg.P7pS56kUCLBeDNZB2RldlV6iK",
+    "gender": "male",
+    "avatarUrl": "img/user/023648.png",
+    "date": "2024-07-21T17:23:43.027Z",
+}
+
+
 # AWARD
 ## POST /api/awards (Private, admin) - Create new award
 body properties

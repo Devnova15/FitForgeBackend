@@ -45,6 +45,8 @@ const UserSchema = new Schema(
       default: true,
     },
     awards: [{ type: Schema.Types.ObjectId, ref: "awards" }],
+    followers: [{ type: Schema.Types.ObjectId, ref: "users" }],
+    followedBy: [{ type: Schema.Types.ObjectId, ref: "users" }],
     date: {
       type: Date,
       default: Date.now,

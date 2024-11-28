@@ -271,6 +271,8 @@ exports.getUserById = (req, res) => {
   User.findOne({ _id: req.params.id })
     .select("-login -password")
     .populate("awards")
+    .populate("followedBy", "firstName lastName email avatarUrl")
+    .populate("followers", "firstName lastName email avatarUrl")
     .then((user) => {
       if (!user) {
         return res.status(404).json({
@@ -321,6 +323,8 @@ exports.addAwardToUser = async (req, res, next) => {
           { new: true },
         )
           .populate("awards")
+          .populate("followedBy", "firstName lastName email avatarUrl")
+          .populate("followers", "firstName lastName email avatarUrl")
           .then((user) => res.json(user))
           .catch((err) =>
             res.status(400).json({
@@ -362,6 +366,149 @@ exports.deleteAwardFromUser = async (req, res, next) => {
           { new: true },
         )
           .populate("awards")
+          .populate("followedBy", "firstName lastName email avatarUrl")
+          .populate("followers", "firstName lastName email avatarUrl")
+          .then((user) => res.json(user))
+          .catch((err) =>
+            res.status(400).json({
+              message: `Error happened on server: "${err}" `,
+            }),
+          );
+      }
+    })
+    .catch((err) =>
+      res.status(400).json({
+        message: `Error happened on server: "${err}" `,
+      }),
+    );
+};
+
+exports.addUserToFollowers = async (req, res, next) => {
+  if (req.params.userId === req.user.id) {
+    res.status(400).json({
+      message: `You can not add yourself to the followers list`,
+    });
+    return;
+  }
+
+  let userToAdd;
+  try {
+    userToAdd = await User.findOne({ _id: req.params.userId });
+  } catch (err) {
+    res.status(400).json({
+      message: `Error happened on server: "${err}" `,
+    });
+  }
+
+  if (!userToAdd) {
+    res.status(404).json({
+      message: `User with id "${req.params.userId}" is not found.`,
+    });
+  } else {
+    User.findOne({ _id: req.user.id })
+      .then((user) => {
+        if (user.followers.includes(req.params.userId)) {
+          res.status(400).json({
+            message: `User with _id "${req.params.userId}" already present in your followers list.`,
+          });
+
+          return;
+        }
+
+        userToAdd.followedBy = userToAdd.followedBy.concat(req.user.id);
+        const updatedUserToAdd = queryCreator(userToAdd);
+
+        User.findOneAndUpdate(
+          { _id: req.params.userId },
+          { $set: updatedUserToAdd },
+          { new: true },
+        ).catch((err) =>
+          res.status(400).json({
+            message: `Error happened on server: "${err}" `,
+          }),
+        );
+
+        user.followers = user.followers.concat(req.params.userId);
+        const updatedUser = queryCreator(user);
+
+        User.findOneAndUpdate(
+          { _id: req.user.id },
+          { $set: updatedUser },
+          { new: true },
+        )
+          .populate("awards")
+          .populate("followedBy", "firstName lastName email avatarUrl")
+          .populate("followers", "firstName lastName email avatarUrl")
+          .then((user) => res.json(user))
+          .catch((err) =>
+            res.status(400).json({
+              message: `Error happened on server: "${err}" `,
+            }),
+          );
+      })
+      .catch((err) =>
+        res.status(400).json({
+          message: `Error happened on server: "${err}" `,
+        }),
+      );
+  }
+};
+
+exports.deleteUserFromFollowers = async (req, res, next) => {
+  let userToDelete;
+
+  try {
+    userToDelete = await User.findOne({ _id: req.params.userId });
+  } catch (err) {
+    res.status(400).json({
+      message: `Error happened on server: "${err}" `,
+    });
+  }
+
+  if (userToDelete) {
+    userToDelete.followedBy = userToDelete.followedBy.filter(
+      (elem) => elem.toString() !== req.user.id,
+    );
+    const updatedUserToDelete = queryCreator(userToDelete);
+
+    User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $set: updatedUserToDelete },
+      { new: true },
+    ).catch((err) =>
+      res.status(400).json({
+        message: `Error happened on server: "${err}" `,
+      }),
+    );
+  }
+
+  User.findOne({ _id: req.user.id })
+    .then((user) => {
+      if (!user) {
+        res.status(400).json({ message: `User not found` });
+      } else {
+        if (!user.followers.includes(req.params.userId)) {
+          res.status(400).json({
+            message: `User with _id "${req.params.userId}" is not present in your followers list.`,
+          });
+
+          return;
+        }
+
+        user.followers = user.followers.filter(
+          (elem) => elem.toString() !== req.params.userId,
+        );
+
+        const updatedUser = queryCreator(user);
+
+        User.findOneAndUpdate(
+          { _id: req.user.id },
+          { $set: updatedUser },
+          { new: true },
+        )
+          .populate("awards")
+          .populate("followedBy", "firstName lastName email avatarUrl")
+          .populate("followers", "firstName lastName email avatarUrl")
           .then((user) => res.json(user))
           .catch((err) =>
             res.status(400).json({
@@ -378,23 +525,24 @@ exports.deleteAwardFromUser = async (req, res, next) => {
 };
 
 exports.getUsersFilterParams = async (req, res, next) => {
-    const mongooseQuery = filterParser(req.query);
-    const perPage = Number(req.query.perPage) || 10;
-    const startPage = Number(req.query.startPage) || 1;
-    const sort = req.query.sort || "date";
+  const mongooseQuery = filterParser(req.query);
+  const perPage = Number(req.query.perPage) || 10;
+  const startPage = Number(req.query.startPage) || 1;
+  const sort = req.query.sort || "date";
 
-    try {
-        const users = await User.find(mongooseQuery).select("-login -password -isAdmin")
-            .skip(startPage * perPage - perPage)
-            .limit(perPage)
-            .sort(sort);
+  try {
+    const users = await User.find(mongooseQuery)
+      .select("-login -password -isAdmin")
+      .skip(startPage * perPage - perPage)
+      .limit(perPage)
+      .sort(sort);
 
-        const usersQuantity = await User.find(mongooseQuery);
+    const usersQuantity = await User.find(mongooseQuery);
 
-        res.json({ users, usersQuantity: usersQuantity.length });
-    } catch (err) {
-        res.status(400).json({
-            message: `Error happened on server: "${err}" `,
-        });
-    }
+    res.json({ users, usersQuantity: usersQuantity.length });
+  } catch (err) {
+    res.status(400).json({
+      message: `Error happened on server: "${err}" `,
+    });
+  }
 };

@@ -12,6 +12,8 @@ const {
   addAwardToUser,
   deleteAwardFromUser,
   getUsersFilterParams,
+  addUserToFollowers,
+  deleteUserFromFollowers,
 } = require("../controllers/users");
 
 // @route   POST /api/users
@@ -59,6 +61,24 @@ router.delete(
   "/awards/:awardId",
   passport.authenticate("jwt", { session: false }),
   deleteAwardFromUser,
+);
+
+// @route   PUT /api/users/followers/:userId
+// @desc    Add user to follower list
+// @access  Private
+router.put(
+    "/followers/:userId",
+    passport.authenticate("jwt", { session: false }),
+    addUserToFollowers,
+);
+
+// @route   DELETE /api/users/followers/:userId
+// @desc    Delete user from follower list
+// @access  Private
+router.delete(
+    "/followers/:userId",
+    passport.authenticate("jwt", { session: false }),
+    deleteUserFromFollowers,
 );
 
 // @route   GET api/users

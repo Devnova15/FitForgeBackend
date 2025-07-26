@@ -10,9 +10,14 @@ const users = require('./routes/user');
 const posts = require('./routes/post');
 const comments = require('./routes/comments');
 const awards = require('./routes/awards');
+const cors = require('cors')
 // const mainRoute = require('./routes/index');
 
 const app = express();
+
+app.use(cors({
+  origin: ['http://localhost:5173']
+}))
 
 // Body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));

@@ -52,7 +52,7 @@ const UserSchema = new Schema(
       default: Date.now,
     },
   },
-  { strict: false },
+  { strict: false }
 );
 
 UserSchema.methods.comparePassword = function (candidatePassword, cb) {

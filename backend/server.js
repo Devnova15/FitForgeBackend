@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const path = require('path');
+const multer = require('multer'); // Добавить эту строку
 require('dotenv').config();
 
 const globalConfigs = require('./routes/globalConfigs');
@@ -10,14 +11,13 @@ const users = require('./routes/user');
 const posts = require('./routes/post');
 const comments = require('./routes/comments');
 const awards = require('./routes/awards');
-const cors = require('cors')
-// const mainRoute = require('./routes/index');
+const cors = require('cors');
 
 const app = express();
 
 app.use(cors({
   origin: ['http://localhost:5173']
-}))
+}));
 
 // Body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -44,17 +44,25 @@ app.use('/api/users', users);
 app.use('/api/posts', posts);
 app.use('/api/comments', comments);
 app.use('/api/awards', awards);
-// app.use('/', mainRoute);
 
 // Server static assets if in production
 if (process.env.NODE_ENV === 'production') {
-  // Set static folder
   app.use(express.static('client/build'));
 
   app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
   });
 }
+
+// Обработка ошибок multer
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ error: err.message });
+  } else if (err && err.message.includes('изображения')) {
+    return res.status(400).json({ error: err.message });
+  }
+  next(err);
+});
 
 const port = process.env.PORT || 4000;
 

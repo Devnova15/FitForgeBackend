@@ -3,24 +3,50 @@ const queryCreator = require("../commonHelpers/queryCreator");
 const filterParser = require("../commonHelpers/filterParser");
 const _ = require("lodash");
 
-exports.createPost = (req, res, next) => {
-  const postData = _.cloneDeep(req.body);
-  postData.user = req.user.id;
+// controllers/post.js
+exports.createPost = async (req, res) => {
+  try {
+    // Получаем загруженные файлы из S3
+    const files = req.files;
+    const imageUrls = files ? files.map((file) => file.location) : [];
 
-  const newPost = new Post(queryCreator(postData));
+    console.log("Загруженные изображения:", imageUrls);
+    console.log("Контент:", req.body.content);
+    console.log("Пользователь:", req.user);
 
-  newPost.populate("user", "firstName lastName email avatarUrl").execPopulate();
+    // Создаем пост с правильными полями согласно модели
+    const postData = {
+      user: req.user.id, // поле user (не author)
+      content: req.body.content,
+      imageUrls: imageUrls, // поле imageUrls (не images)
+      enabled: true,
+      likes: [], // массив строк, не число
+      date: new Date() // поле date (не createdAt)
+    };
 
-  newPost
-    .save()
-    .then((post) => res.json(post))
-    .catch((err) =>
-      res.status(400).json({
-        message: `Error happened on server: "${err}" `,
-      }),
-    );
+    // Сохраняем в MongoDB
+    const newPost = new Post(postData);
+    await newPost.save();
+
+    // Получаем созданный пост с populate
+    const populatedPost = await Post.findById(newPost._id)
+      .populate("user", "firstName lastName email avatarUrl");
+
+    res.status(201).json({
+      message: "Пост создан успешно",
+      post: populatedPost
+    });
+    
+  } catch (error) {
+    console.error("Ошибка создания поста:", error);
+    res.status(500).json({
+      error: "Ошибка при создании поста",
+      details: error.message,
+    });
+  }
 };
 
+// Остальные методы остаются без изменений...
 exports.updatePost = (req, res, next) => {
   Post.findOne({ _id: req.params.id })
     .then((post) => {
@@ -155,7 +181,8 @@ exports.getPostsFilterParams = async (req, res, next) => {
     const posts = await Post.find(mongooseQuery)
       .skip(startPage * perPage - perPage)
       .limit(perPage)
-      .sort(sort);
+      .sort(sort)
+      .populate("user", "firstName lastName email avatarUrl");
 
     const postsQuantity = await Post.find(mongooseQuery);
 

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const path = require('path');
-const multer = require('multer'); // Добавить эту строку
+const multer = require('multer');
 require('dotenv').config();
 
 const globalConfigs = require('./routes/globalConfigs');
@@ -14,6 +14,10 @@ const awards = require('./routes/awards');
 const cors = require('cors');
 
 const app = express();
+
+// Multer configuration for file uploads
+const uploadRoutes = require('./routes/uploadRoutes');
+app.use('/api/files', uploadRoutes);
 
 app.use(cors({
   origin: ['http://localhost:5173']
